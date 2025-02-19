@@ -12,9 +12,17 @@ provider:
   region: eu-west-1
 
 functions:
-  hello:
-    handler: handler.hello
+  getProductsList:
+    handler: handlers/getProductsList.getProductsList
     events:
-      - httpApi:
-          path: /
+      - http:
+          path: products
           method: get
+          cors: true
+  getProductsById:
+    handler: handlers/getProductsById.getProductsById
+    events:
+      - http:
+          path: products/{productId}
+          method: get
+          cors: true
