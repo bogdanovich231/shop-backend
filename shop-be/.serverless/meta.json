@@ -1,0 +1,83 @@
+{
+  "unknown": {
+    "versionFramework": "4.6.3",
+    "command": [],
+    "options": {},
+    "serviceProviderAwsCfStackId": null,
+    "serviceProviderAwsCfStackCreated": null,
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": null,
+    "serviceProviderAwsCfStackOutputs": null
+  },
+  "D:\\shop-backend\\shop-be\\product-service\\serverless.yml": {
+    "versionFramework": "4.6.3",
+    "servicePath": "D:\\shop-backend\\shop-be\\product-service\\serverless.yml",
+    "serviceConfigFileName": "serverless.yml",
+    "service": {
+      "org": "rstanya",
+      "app": "shop-be",
+      "service": "product-service",
+      "provider": {
+        "name": "aws",
+        "runtime": "nodejs20.x",
+        "stage": "dev",
+        "region": "us-east-1",
+        "versionFunctions": true
+      },
+      "functions": {
+        "hello": {
+          "handler": "handler.hello",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/",
+                "method": "get"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs20.x",
+      "stage": "dev",
+      "region": "us-east-1",
+      "versionFunctions": true
+    },
+    "dashboard": {
+      "isEnabledForService": true,
+      "requiredAuthentication": false,
+      "orgFeaturesInUse": {
+        "providers": false,
+        "monitoring": false
+      },
+      "orgObservabilityIntegrations": null,
+      "serviceAppId": "ybfxf2vDKX0xDHqzGG",
+      "serviceProvider": null,
+      "instanceParameters": null
+    },
+    "error": {
+      "message": "The \"create\" command was deprecated in v4. To create a new project, run the \"serverless\" command instead.",
+      "code": "UNRECOGNIZED_CLI_COMMAND"
+    },
+    "serviceRawFile": "# \"org\" ensures this Service is used with the correct Serverless Framework Access Key.\norg: rstanya\n# \"app\" enables Serverless Framework Dashboard features and sharing them with other Services.\napp: shop-be\n# \"service\" is the name of this project. This will also be added to your AWS resource names.\nservice: product-service\n\nprovider:\n  name: aws\n  runtime: nodejs20.x\n\nfunctions:\n  hello:\n    handler: handler.hello\n    events:\n      - httpApi:\n          path: /\n          method: get\n",
+    "command": [
+      "create"
+    ],
+    "options": {
+      "template": "aws-nodejs-typescript",
+      "path": "product-service"
+    },
+    "orgId": "07eb0ae0-1a81-4efa-934c-4d52dc628933",
+    "orgName": "rstanya",
+    "userId": "XjpWVpjVpgxQnWRVqr",
+    "userName": "rstanya",
+    "serviceProviderAwsAccountId": "430118835161",
+    "serviceProviderAwsCfStackId": null,
+    "serviceProviderAwsCfStackCreated": null,
+    "serviceProviderAwsCfStackUpdated": null,
+    "serviceProviderAwsCfStackStatus": null,
+    "serviceProviderAwsCfStackOutputs": null
+  }
+}
