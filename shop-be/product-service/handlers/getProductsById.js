@@ -1,18 +1,22 @@
-const headers = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Access-Control-Allow-Methods": "GET",
-};
+const headers = require("./utils/headers");
+const products = require("./utils/products");
 
 async function getProductsById(event) {
-  console.log('Request event:', event); 
+  const productId = event.pathParameters.productId;  
+  const product = products.find(p => p.id === productId); 
+
+  if (!product) {
+    return {
+      statusCode: 404,
+      headers,
+      body: JSON.stringify({ message: "Product not found" }),
+    };
+  }
+
   return {
     statusCode: 200,
     headers,
-    body: JSON.stringify({
-      message: "Go Serverless v4! Your function executed successfully!",
-    }),
+    body: JSON.stringify(product),
   };
 };
 
