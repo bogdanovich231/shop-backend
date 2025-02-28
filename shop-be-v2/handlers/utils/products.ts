@@ -5,7 +5,7 @@ interface IProducts {
   image: string;
   price: number;
 }
-const productList: IProducts[] = [
+const products: IProducts[] = [
   {
     id: "1",
     title: "Clean Code",
@@ -57,4 +57,4 @@ const productList: IProducts[] = [
   },
 ];
 
-module.exports = productList;
+export default products;

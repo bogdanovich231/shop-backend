@@ -1,9 +1,12 @@
-const headers = require("./utils/headers");
-const products = require("./utils/products");
+import headers from "./utils/headers";
+import products from "./utils/products";
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 
-async function getProductsById(event) {
-  const productId = Number(event.pathParameters.productId);
-  const product = products.find((p) => p.id === productId);
+async function getProductsById(
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> {
+  const productId = Number(event.pathParameters?.productId);
+  const product = products.find((p) => Number(p.id) === productId);
 
   if (!product) {
     return {
@@ -20,4 +23,4 @@ async function getProductsById(event) {
   };
 }
 
-module.exports = { getProductsById };
+export default getProductsById;
