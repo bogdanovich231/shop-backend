@@ -2,8 +2,8 @@ const headers = require("./utils/headers");
 const products = require("./utils/products");
 
 async function getProductsById(event) {
-  const productId = event.pathParameters.productId;  
-  const product = products.find(p => p.id === productId); 
+  const productId = Number(event.pathParameters.productId);
+  const product = products.find((p) => p.id === productId);
 
   if (!product) {
     return {
@@ -18,6 +18,6 @@ async function getProductsById(event) {
     headers,
     body: JSON.stringify(product),
   };
-};
+}
 
 module.exports = { getProductsById };
