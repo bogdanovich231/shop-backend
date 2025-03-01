@@ -2,10 +2,23 @@ import * as cdk from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 export class ProductServiceCdkStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    const productsTable = dynamodb.Table.fromTableName(
+      this,
+      "ProductsTable",
+      "products"
+    );
+
+    const stocksTable = dynamodb.Table.fromTableName(
+      this,
+      "StocksTable",
+      "stocks"
+    );
 
     const lambdaRole = new iam.Role(this, "LambdaRole", {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
@@ -17,14 +30,21 @@ export class ProductServiceCdkStack extends cdk.Stack {
       )
     );
 
+    productsTable.grantReadData(lambdaRole);
+    stocksTable.grantReadData(lambdaRole);
+
     const getProductsList = new lambda.Function(
       this,
       "GetProductsListFunction",
       {
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: "getProductsList.getProductsList",
-        code: lambda.Code.fromAsset("handlers"), 
+        code: lambda.Code.fromAsset("dist/handlers"),
         role: lambdaRole,
+        environment: {
+          PRODUCTS_TABLE: productsTable.tableName,
+          STOCKS_TABLE: stocksTable.tableName,
+        },
       }
     );
 
@@ -34,11 +54,14 @@ export class ProductServiceCdkStack extends cdk.Stack {
       {
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: "getProductsById.getProductsById",
-        code: lambda.Code.fromAsset("handlers"),
+        code: lambda.Code.fromAsset("dist/handlers"),
         role: lambdaRole,
+        environment: {
+          PRODUCTS_TABLE: productsTable.tableName,
+          STOCKS_TABLE: stocksTable.tableName,
+        },
       }
     );
-
 
     const api = new apigateway.RestApi(this, "ProductApi", {
       restApiName: "Product Service",
