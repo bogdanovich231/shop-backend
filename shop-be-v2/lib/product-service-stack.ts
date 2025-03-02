@@ -30,8 +30,8 @@ export class ProductServiceCdkStack extends cdk.Stack {
       )
     );
 
-    productsTable.grantReadData(lambdaRole);
-    stocksTable.grantReadData(lambdaRole);
+    productsTable.grantReadWriteData(lambdaRole);
+    stocksTable.grantReadWriteData(lambdaRole);
 
     const getProductsList = new lambda.Function(
       this,
@@ -62,7 +62,7 @@ export class ProductServiceCdkStack extends cdk.Stack {
         },
       }
     );
-    
+
     const createProductFunction = new lambda.Function(
       this,
       "CreateProductFunction",
@@ -83,6 +83,8 @@ export class ProductServiceCdkStack extends cdk.Stack {
       description: "API for Product Service",
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
       },
     });
 
