@@ -4,7 +4,7 @@ info:
   description: API documentation for managing products in the product catalog.
   version: 1.0.0
 servers:
-  - url: https://5lhqs4npia.execute-api.eu-west-1.amazonaws.com/dev/products
+  - url: https://1n09q877x5.execute-api.eu-west-1.amazonaws.com/prod/products
     description: server
 paths:
   /products:
@@ -35,6 +35,81 @@ paths:
                     price:
                       type: integer
                       description: The product price
+    post:
+      summary: Create a new product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: The product name
+                description:
+                  type: string
+                  description: The product description
+                image:
+                  type: string
+                  description: The product link of image
+                price:
+                  type: integer
+                  description: The product price
+                count:
+                  type: integer
+                  description: The number of products in stock
+              required:
+                - title
+                - description
+                - price
+                - count
+      responses:
+        "200":
+          description: The product was created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The ID of the created product
+                  title:
+                    type: string
+                    description: The product name
+                  description:
+                    type: string
+                    description: The product description
+                  image:
+                    type: string
+                    description: The product link of image
+                  price:
+                    type: integer
+                    description: The product price
+                  count:
+                    type: integer
+                    description: The number of products in stock
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error message
   /products/{productId}:
     get:
       summary: Get details of a specific product
@@ -43,7 +118,7 @@ paths:
           name: productId
           required: true
           schema:
-            type: integer
+            type: string
           description: The product ID
       responses:
         "200":
