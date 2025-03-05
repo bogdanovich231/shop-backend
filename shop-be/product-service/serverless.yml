@@ -11,6 +11,12 @@ provider:
   stage: dev
   region: eu-west-1
 
+plugins:
+  - serverless-jest-plugin
+custom:
+  jest:
+  collectCoverage: true
+
 functions:
   getProductsList:
     handler: handlers/getProductsList.getProductsList

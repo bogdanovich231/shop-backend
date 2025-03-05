@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: Product Service API
+  description: API documentation for managing products in the product catalog.
+  version: 1.0.0
+servers:
+  - url: https://5lhqs4npia.execute-api.eu-west-1.amazonaws.com/dev/products
+    description: server
+paths:
+  /products:
+    get:
+      summary: Get a list of products
+      responses:
+        "200":
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: The product ID
+                    title:
+                      type: string
+                      description: The product name
+                    description:
+                      type: string
+                      description: The product description
+                    image:
+                      type: string
+                      description: The product link of image
+                    price:
+                      type: integer
+                      description: The product price
+  /products/{productId}:
+    get:
+      summary: Get details of a specific product
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: integer
+          description: The product ID
+      responses:
+        "200":
+          description: The product details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: The product ID
+                  title:
+                    type: string
+                    description: The product name
+                  description:
+                    type: string
+                    description: The product description
+                  image:
+                    type: string
+                    description: The product link of image
+                  price:
+                    type: integer
+                    description: The product price
+        "404":
+          description: Product not found

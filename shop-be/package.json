@@ -1,0 +1,11 @@
+{
+  "name": "product-service",
+  "lockfileVersion": 3,
+  "requires": true,
+  "scripts": {
+  "test": "jest --coverage"
+},
+  "devDependencies": {
+    "serverless-jest-plugin": "^0.4.0"
+  }
+}
