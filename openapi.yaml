@@ -145,3 +145,43 @@ paths:
                     description: The product price
         "404":
           description: Product not found
+  /import:
+    get:
+      summary: Get a signed URL for uploading a CSV file
+      description: Returns a signed URL that can be used to upload a CSV file to the S3 bucket.
+      parameters:
+        - name: name
+          in: query
+          description: The name of the CSV file to upload
+          required: true
+          schema:
+            type: string
+            example: filename.csv
+      responses:
+        "200":
+          description: A signed URL for uploading the file
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: https://j7pd0a74a0.execute-api.eu-west-1.amazonaws.com/prod/import?name=filename.csv
+        "400":
+          description: Bad request. The file name is missing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: File name is required
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal Server Error
