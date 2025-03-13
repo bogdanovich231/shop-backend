@@ -1,7 +1,9 @@
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { SQSRecord } from "aws-lambda";
+import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 
-const client = new DynamoDBClient({ region: "eu-west-1" });
+const dynamoDbClient = new DynamoDBClient({ region: "eu-west-1" });
+const snsClient = new SNSClient({ region: "eu-west-1" });
 
 export async function catalogBatchProcess(event: {
   Records: SQSRecord[];
@@ -24,7 +26,7 @@ export async function catalogBatchProcess(event: {
       const params = {
         TableName: process.env.PRODUCTS_TABLE!,
         Item: {
-          productId: { S: product.id },
+          id: { S: product.id },
           title: { S: product.title },
           description: { S: product.description },
           price: { N: product.price.toString() },
@@ -32,7 +34,15 @@ export async function catalogBatchProcess(event: {
         },
       };
       const command = new PutItemCommand(params);
-      await client.send(command);
+      await dynamoDbClient.send(command);
+
+      const snsParams = {
+        TopicArn: process.env.SNS_TOPIC_ARN,
+        Message: JSON.stringify(product),
+        Subject: "New product added",
+      };
+
+      await snsClient.send(new PublishCommand(snsParams));
 
       console.log(`Product added: ${product.id}`);
     } catch (error) {

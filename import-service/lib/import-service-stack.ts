@@ -8,6 +8,7 @@ import * as s3n from "aws-cdk-lib/aws-s3-notifications";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as sns from "aws-cdk-lib/aws-sns";
 
 export class ImportServiceStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -28,8 +29,17 @@ export class ImportServiceStack extends cdk.Stack {
     });
 
     const queue = new sqs.Queue(this, "catalogItemsQueue", {
-      visibilityTimeout: cdk.Duration.seconds(200),
+      visibilityTimeout: cdk.Duration.seconds(30),
     });
+
+    const topic = new sns.Topic(this, "createProductTopic", {
+      topicName: "createProductTopic",
+    });
+    const email = "kulinkovich56@gmail.com";
+
+    topic.addSubscription(
+      new cdk.aws_sns_subscriptions.EmailSubscription(email)
+    );
 
     lambdaRole.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName(
@@ -43,6 +53,8 @@ export class ImportServiceStack extends cdk.Stack {
 
     bucket.grantReadWrite(lambdaRole);
 
+    topic.grantPublish(lambdaRole);
+
     const catalogBatchProcess = new lambda.Function(
       this,
       "CatalogBatchProcess",
@@ -53,9 +65,13 @@ export class ImportServiceStack extends cdk.Stack {
         role: lambdaRole,
         environment: {
           PRODUCTS_TABLE: productsTable.tableName,
+          SNS_TOPIC_ARN: topic.topicArn,
         },
       }
     );
+
+    topic.grantPublish(catalogBatchProcess);
+    catalogBatchProcess.addEnvironment("SNS_TOPIC_ARN", topic.topicArn);
 
     const importProductsFile = new lambda.Function(
       this,
