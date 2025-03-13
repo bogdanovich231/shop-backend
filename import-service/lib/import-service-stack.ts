@@ -5,6 +5,9 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3n from "aws-cdk-lib/aws-s3-notifications";
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 export class ImportServiceStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -14,8 +17,18 @@ export class ImportServiceStack extends cdk.Stack {
       bucketName: "import-service-bucket-rs1",
     });
 
+    const productsTable = dynamodb.Table.fromTableName(
+      this,
+      "ProductsTable",
+      "products"
+    );
+
     const lambdaRole = new iam.Role(this, "LambdaRole", {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+    });
+
+    const queue = new sqs.Queue(this, "catalogItemsQueue", {
+      visibilityTimeout: cdk.Duration.seconds(200),
     });
 
     lambdaRole.addManagedPolicy(
@@ -24,9 +37,25 @@ export class ImportServiceStack extends cdk.Stack {
       )
     );
 
+    productsTable.grantReadWriteData(lambdaRole);
+
     bucket.grantPut(lambdaRole);
 
     bucket.grantReadWrite(lambdaRole);
+
+    const catalogBatchProcess = new lambda.Function(
+      this,
+      "CatalogBatchProcess",
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        handler: "catalogBatchProcess.catalogBatchProcess",
+        code: lambda.Code.fromAsset("dist/handlers"),
+        role: lambdaRole,
+        environment: {
+          PRODUCTS_TABLE: productsTable.tableName,
+        },
+      }
+    );
 
     const importProductsFile = new lambda.Function(
       this,
@@ -77,6 +106,11 @@ export class ImportServiceStack extends cdk.Stack {
       "GET",
       new apigateway.LambdaIntegration(importProductsFile)
     );
+
+    const eventSource = new SqsEventSource(queue, {
+      batchSize: 5,
+    });
+    catalogBatchProcess.addEventSource(eventSource);
 
     new cdk.CfnOutput(this, "ImportApiUrl", {
       value: api.url,
