@@ -36,7 +36,13 @@ export async function importFileParser(event: any): Promise<void> {
           try {
             const sendMessageCommand = new SendMessageCommand({
               QueueUrl: process.env.SQS_QUEUE_URL,
-              MessageBody: JSON.stringify(data),
+              MessageBody: JSON.stringify({
+                id: data.id,
+                title: data.title,
+                price: data.price,
+                description: data.description,
+                image: data.image || "",
+              }),
             });
             await sqsClient.send(sendMessageCommand);
             console.log("Record sent to SQS:", data);

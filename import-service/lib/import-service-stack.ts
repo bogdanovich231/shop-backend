@@ -29,6 +29,7 @@ export class ImportServiceStack extends cdk.Stack {
     });
 
     const queue = new sqs.Queue(this, "catalogItemsQueue", {
+      queueName: "catalogItemsQueue",
       visibilityTimeout: cdk.Duration.seconds(30),
     });
 
@@ -46,7 +47,21 @@ export class ImportServiceStack extends cdk.Stack {
         "service-role/AWSLambdaBasicExecutionRole"
       )
     );
-
+    lambdaRole.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:Query",
+          "dynamodb:GetItem",
+        ],
+        resources: [
+          productsTable.tableArn,
+          `arn:aws:dynamodb:eu-west-1:${cdk.Aws.ACCOUNT_ID}:table/products`,
+        ],
+      })
+    );
     productsTable.grantReadWriteData(lambdaRole);
 
     bucket.grantPut(lambdaRole);
@@ -54,6 +69,8 @@ export class ImportServiceStack extends cdk.Stack {
     bucket.grantReadWrite(lambdaRole);
 
     topic.grantPublish(lambdaRole);
+
+    queue.grantSendMessages(lambdaRole);
 
     const catalogBatchProcess = new lambda.Function(
       this,
@@ -72,7 +89,7 @@ export class ImportServiceStack extends cdk.Stack {
 
     topic.grantPublish(catalogBatchProcess);
     catalogBatchProcess.addEnvironment("SNS_TOPIC_ARN", topic.topicArn);
-
+    queue.grantConsumeMessages(catalogBatchProcess);
     const importProductsFile = new lambda.Function(
       this,
       "ImportProductsFileFunction",
@@ -97,6 +114,7 @@ export class ImportServiceStack extends cdk.Stack {
         role: lambdaRole,
         environment: {
           BUCKET_NAME: bucket.bucketName,
+          SQS_QUEUE_URL: queue.queueUrl,
         },
       }
     );
