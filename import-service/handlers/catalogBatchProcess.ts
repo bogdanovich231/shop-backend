@@ -40,9 +40,17 @@ export async function catalogBatchProcess(event: {
         TopicArn: process.env.SNS_TOPIC_ARN,
         Message: JSON.stringify(product),
         Subject: "New product added",
+        MessageAttributes: {
+          price: {
+            DataType: "Number",
+            StringValue: product.price.toString(),
+          },
+        },
       };
 
+      console.log("Sending message to SNS:", snsParams);
       await snsClient.send(new PublishCommand(snsParams));
+      console.log("Message sent to SNS successfully");
 
       console.log(`Product added: ${product.id}`);
     } catch (error) {

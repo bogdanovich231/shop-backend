@@ -9,6 +9,7 @@ import * as sqs from "aws-cdk-lib/aws-sqs";
 import { SqsEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as sns from "aws-cdk-lib/aws-sns";
+import * as subs from "aws-cdk-lib/aws-sns-subscriptions";
 
 export class ImportServiceStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -36,10 +37,37 @@ export class ImportServiceStack extends cdk.Stack {
     const topic = new sns.Topic(this, "createProductTopic", {
       topicName: "createProductTopic",
     });
+
     const email = "kulinkovich56@gmail.com";
+    const email2 = "testtatsiana6@gmail.com";
 
     topic.addSubscription(
-      new cdk.aws_sns_subscriptions.EmailSubscription(email)
+      new subs.EmailSubscription(email2, {
+        filterPolicy: {
+          price: sns.SubscriptionFilter.numericFilter({
+            greaterThan: 100,
+          }),
+        },
+      })
+    );
+
+    topic.addSubscription(
+      new subs.EmailSubscription(email, {
+        filterPolicy: {
+          price: sns.SubscriptionFilter.numericFilter({
+            lessThanOrEqualTo: 100,
+          }),
+        },
+      })
+    );
+
+    topic.addToResourcePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["sns:Publish"],
+        resources: [topic.topicArn],
+        principals: [new iam.AnyPrincipal()],
+      })
     );
 
     lambdaRole.addManagedPolicy(
@@ -90,6 +118,7 @@ export class ImportServiceStack extends cdk.Stack {
     topic.grantPublish(catalogBatchProcess);
     catalogBatchProcess.addEnvironment("SNS_TOPIC_ARN", topic.topicArn);
     queue.grantConsumeMessages(catalogBatchProcess);
+
     const importProductsFile = new lambda.Function(
       this,
       "ImportProductsFileFunction",
